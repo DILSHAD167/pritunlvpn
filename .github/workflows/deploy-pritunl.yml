@@ -19,7 +19,7 @@ jobs:
 
     - name: Deploy to EC2
       run: |
-         ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+        ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
         sudo apt update && sudo apt upgrade -y
         sudo apt install -y gnupg
         sudo mkdir -p /etc/apt/keyrings
@@ -31,5 +31,4 @@ jobs:
         sudo apt install -y pritunl mongodb-org
         sudo systemctl enable mongod pritunl
         sudo systemctl start mongod pritunl
-
         EOF
