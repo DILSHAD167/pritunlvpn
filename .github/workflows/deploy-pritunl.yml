@@ -19,14 +19,17 @@ jobs:
 
     - name: Deploy to EC2
       run: |
-        ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+         ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
         sudo apt update && sudo apt upgrade -y
-        echo "deb http://repo.pritunl.com/stable/apt jammy main" | sudo tee /etc/apt/sources.list.d/pritunl.list
-        sudo apt --assume-yes install gnupg
-        sudo gpg --keyserver keyserver.ubuntu.com --recv-keys 7568D9BB55FF9E5287D586017AE645C0CF8E292A
-        sudo gpg --export 7568D9BB55FF9E5287D586017AE645C0CF8E292A | sudo tee /etc/apt/trusted.gpg.d/pritunl.asc
+        sudo apt install -y gnupg
+        sudo mkdir -p /etc/apt/keyrings
+        curl -fsSL https://raw.githubusercontent.com/pritunl/pgp/master/pritunl_repo_pub.asc | sudo tee /etc/apt/keyrings/pritunl.asc
+        echo "deb [signed-by=/etc/apt/keyrings/pritunl.asc] http://repo.pritunl.com/stable/apt jammy main" | sudo tee /etc/apt/sources.list.d/pritunl.list
+        curl -fsSL https://pgp.mongodb.com/server-6.0.asc | sudo tee /etc/apt/keyrings/mongodb.asc
+        echo "deb [signed-by=/etc/apt/keyrings/mongodb.asc] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list
         sudo apt update
-        sudo apt --assume-yes install pritunl mongodb
+        sudo apt install -y pritunl mongodb-org
         sudo systemctl enable mongod pritunl
         sudo systemctl start mongod pritunl
+
         EOF
